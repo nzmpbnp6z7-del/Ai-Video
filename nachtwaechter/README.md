@@ -1,32 +1,47 @@
-# Die Regeln des Nachtwächters – TikTok-Serie (5 Teile)
+# Die Regeln des Nachtwächters – TikTok-Horrorserie (5 Teile)
 
-Interaktive Horror-Miniserie im Hochformat (1080×1920, 30 fps). Jonas fängt einen Nachtjob
-im leeren Einkaufszentrum *Lindenhof* an und findet einen Zettel mit sieben seltsamen Regeln.
-Jeder Teil endet mit einer A/B-Entscheidung – die richtige Antwort steckt in den Regeln aus Teil 1.
+Interaktive Horror-Miniserie im Hochformat (1080×1920, 30 fps). Jeder Teil endet mit einer
+A/B-Entscheidung mit Countdown. Die richtige Antwort steckt in Walters **vier Regeln** aus Teil 1.
 Der nächste Teil beginnt mit der Auflösung.
 
+## Figuren
+| Figur | Rolle | Stimme |
+|---|---|---|
+| **Jonas** (19) | neuer Nachtwächter, Ich-Erzähler | Piper „thorsten“ |
+| **Walter** (68) | alter Nachtwächter, will Jonas' Namen nicht wissen | Piper „karlsson“, tiefer gepitcht |
+| **Mama** | ruft um 00:30 an und sagt laut „Jonas“ | Piper „kerstin“ (Telefonklang) |
+| **Mia** | Mädchen im gelben Regenmantel auf der Rolltreppe | Piper „ramona“, hochgepitcht |
+| **Das Ding** | imitiert jede Stimme, die es gehört hat | alle Stimmen übereinander, verzerrt |
+
+## Die Regeln (Walters Karteikarte)
+1. Hier drin kennt niemand deinen Namen. Halte es so.
+2. Das Radio übertönt alles, was nicht hier sein sollte.
+3. Was im Licht steht, kann sich nicht bewegen.
+4. Ich komme um 6 Uhr. Nie früher.
+
+## Folgen & Lösungen
 | Teil | Situation am Ende | Richtig | Versteckter Hinweis |
 |---|---|---|---|
-| 1 | Eine Stimme ruft aus Lager 3 „Jonas“ – A: hingehen, B: Radio lauter drehen | **B** | Regel 3 (niemand kennt deinen Namen) + Regel 2 (lauter drehen) |
-| 2 | Eine Puppe bei Mode Kessler sieht dich an – A: umdrehen & rennen, B: anleuchten & rückwärts gehen | **B** | Regel 4 (nie den Rücken zudrehen) |
-| 3 | 03:33 Uhr, „Herr Brandt“ ruft an: Feuer, sofort raus – A: raus, B: auflegen & bleiben | **B** | Regel 5 (Brandt telefoniert nie) + Regel 1 (nie vor 6 Uhr raus) |
-| 4 | 05:41 Uhr, Mann in Uniform: „Morgen, Jonas. Du kannst früher gehen.“ – A: gehen, B: bis 6 Uhr bleiben | **B** | Regel 1 + Regel 3 (er kennt deinen Namen) |
-| 5 | Finale: Auflösung + Twist (Regel 8 in Jonas' eigener Handschrift: „Geh niemals in Lager 4.“) | – | Regel 7 (es gibt nur 3 Lager) |
-
-Regel 6 (Foodcourt-Tische) ist ein bewusster Red Herring bzw. Aufhänger für eine Fortsetzung.
+| 1 – Die erste Nacht | „Mama“ ruft aus dem abgeschlossenen Lager 3: „Jonas, mach auf!“ – A: hingehen, B: Radio lauter | **B** | Regel 1 + 2 (das Ding hat den Namen nur beim Telefonat aufgeschnappt) |
+| 2 – Das Mädchen auf der Rolltreppe | Mia fragt: „Und wie heißt du?“ – A: „Ich heiße Jonas“, B: „Ich bin nur der Wachmann“ | **B** | Regel 1 |
+| 3 – Was im Licht steht | Das Ding im gelben Regenmantel kommt bei jedem Flackern näher – A: rennen, B: anleuchten & rückwärts gehen | **B** | Regel 3 |
+| 4 – Klopfen an der Glastür | 05:41 Uhr, „Walter“ klopft: „Jonas! Mach auf!“ – A: aufmachen, B: nicht aufmachen | **B** | Regel 4 + Regel 1 (Walter kennt den Namen gar nicht) |
+| 5 – Sechs Uhr (Finale) | Auflösung, der echte Walter kommt … und sagt zum Abschied „Jonas“ | – | Twist: Jonas hat Walter nie seinen Namen gesagt |
 
 ## Dateien
-- `story.py` – Drehbuch (Regeln, Segmente, Entscheidungen)
-- `render.py` – Generator: Szenen (PIL), Stimme (espeak-ng + MBROLA de6/de4), Sounddesign (numpy), Untertitel, HUD, Ken-Burns, Grain/Flackern
-- `output/nachtwaechter_teil1..5.mp4` – die fertigen Clips, `output/nachtwaechter_komplett.mp4` – alle Teile am Stück
+- `story.py` – Drehbuch (Regeln, Figuren, Segmente, Entscheidungen)
+- `art.py` – SVG-Zeichnungen der Figuren (mit Augen-/Mund-Varianten für Blinzeln & Lippenbewegung) und neuer Hintergründe, gerendert per Chromium (`svg2png.js`)
+- `scenes.py` – prozedurale Hintergründe (Gang, Wachraum, Lagertür, Haupteingang), Regelkarte, Handy-Bildschirme
+- `voices.py` – Figurenstimmen (Piper, neuronale Offline-TTS) + Nachbearbeitung
+- `sound.py` – Sounddesign: Spannungsmusik mit Herzschlag, Regen, Funkrauschen, Effekte
+- `render.py` – Einstellungen (Shots), Kamera, Taschenlampen-Licht, Lip-Sync, Karaoke-Untertitel, Export
+- `output/nachtwaechter_teil1..5.mp4` – fertige Clips
 
 ## Neu rendern
 ```bash
-apt-get install -y espeak-ng mbrola mbrola-de6 mbrola-de4 ffmpeg
-pip install numpy pillow
+apt-get install -y ffmpeg
+pip install numpy pillow piper-tts
+./get_voices.sh            # lädt die deutschen Piper-Stimmen nach ./voices
 python3 render.py          # alle Teile, oder z.B. python3 render.py 2 3
 ```
-
-Tipp für den Upload: In der Caption von Teil 1 „Screenshot die Regeln!“ schreiben und die Teile als Playlist anlegen.
-Die Stimme ist eine Offline-Sprachsynthese – für TikTok kann man die Spur auch durch eine eigene Aufnahme oder eine
-KI-Stimme ersetzen (Texte stehen in `story.py`).
+Benötigt Node.js mit Playwright/Chromium für das Rendern der SVG-Figuren.

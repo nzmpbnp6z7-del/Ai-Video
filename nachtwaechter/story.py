@@ -1,131 +1,167 @@
 # -*- coding: utf-8 -*-
-"""Drehbuch: Die Regeln des Nachtwächters.
+"""Drehbuch: Die Regeln des Nachtwächters (Version 2).
 
-Jedes Segment:
-  scene  : Hintergrund-Szene
-  say    : gesprochener Text (TTS)  -> wird auch als Untertitel gezeigt
-  cap    : optional abweichender Untertitel (z.B. Ziffern statt ausgeschriebener Zahlen)
-  voice  : narr | call | phone | man
-  time   : Uhrzeit im HUD ab diesem Segment ("HH:MM")
-  choice : (A-Text, B-Text) -> Entscheidungs-Karte mit Countdown
-  sfx    : [(name, offset_s), ...]
-  pad    : Pause nach dem Text (s)
-  flick  : Stärke Lichtflackern 0..1
+Figuren
+  Jonas  – 19, neuer Nachtwächter, Ich-Erzähler
+  Walter – 68, alter Nachtwächter, seit 31 Jahren im Lindenhof
+  Mama   – Jonas' Mutter (nur am Telefon)
+  Mia    – kleines Mädchen im gelben Regenmantel … angeblich
+  Das Ding – imitiert Stimmen, die es gehört hat
+
+Segment-Felder
+  shot   : Name der Einstellung (siehe render.py, SHOTS)
+  who    : Sprecher (jonas | walter | walter_door | mama | mama_door | mia | mia_dark | creature)
+  say    : gesprochener Text
+  cap    : abweichender Untertitel
+  talk   : True = Figur im Bild spricht (Lippen bewegen sich)
+  time   : Uhrzeit im Kamera-HUD
+  sfx    : [(name, offset)]
+  pad    : Pause nach dem Text
+  tense  : Spannungs-Level 0..1 (Musik, Herzschlag)
+  opt    : beliebige Shot-Optionen
+  choice : (A, B)  -> Entscheidungs-Karte mit Countdown
 """
 
 TITLE = "DIE REGELN DES NACHTWÄCHTERS"
 
-# (Text auf dem Zettel, gesprochener Text)
 RULES = [
-    ("Dienst: 22:00 – 6:00 Uhr. Verlasse das Gebäude NIE vor 6:00 Uhr – egal, wer dich darum bittet.",
-     "Regel eins. Dein Dienst geht von zweiundzwanzig bis sechs Uhr. Verlasse das Gebäude nie vor sechs Uhr. Egal, wer dich darum bittet."),
-    ("Das Radio im Wachraum darf nie ausgehen. Hörst du etwas, das du nicht hören willst: LAUTER drehen.",
-     "Regel zwei. Das Radio im Wachraum darf niemals ausgehen. Hörst du etwas, das du nicht hören willst: Dreh es lauter."),
-    ("Niemand, der hier nachts arbeitet, kennt deinen Namen. Für uns bist du nur „der Neue“.",
-     "Regel drei. Niemand, der hier nachts arbeitet, kennt deinen Namen. Für uns bist du nur: der Neue."),
-    ("Die Puppen bei Mode Kessler schauen immer zur Wand. Dreh ihnen NIE den Rücken zu.",
-     "Regel vier. Die Schaufensterpuppen bei Mode Kessler schauen immer zur Wand. Dreh ihnen niemals den Rücken zu."),
-    ("Dein Chef, Hr. Brandt, telefoniert nie. Er schreibt nur E-Mails.",
-     "Regel fünf. Dein Chef, Herr Brandt, telefoniert nie. Er schreibt nur E-Mails."),
-    ("Im Foodcourt stehen 24 Tische. Zähl sie niemals nach.",
-     "Regel sechs. Im Foodcourt stehen vierundzwanzig Tische. Zähl sie niemals nach."),
-    ("Es gibt nur 3 Lager. Siehst du eine Tür mit der Nr. 4: Geh weiter.",
-     "Regel sieben. Es gibt nur drei Lager. Siehst du eine Tür mit der Nummer vier: Geh weiter."),
+    "Hier drin kennt niemand deinen Namen. Halte es so.",
+    "Das Radio übertönt alles, was nicht hier sein sollte.",
+    "Was im Licht steht, kann sich nicht bewegen.",
+    "Ich komme um 6 Uhr. Nie früher.",
 ]
-RULE8 = "8. Geh niemals in Lager 4. Du hast es versprochen."
 
-END_HINT = "Schreib A oder B in die Kommentare. Die Lösung steckt in den Regeln."
-
-
-def rule_caption(i):
-    return f"Regel {i + 1}: " + RULES[i][0]
-
+END_Q = "Die Antwort steckt in Walters Regeln. Schreib A oder B in die Kommentare."
 
 PARTS = []
 
-# ---------------------------------------------------------------- TEIL 1
-p1 = [
-    dict(scene="corridor", time="21:54", say="Ich heiße Jonas. Gestern habe ich einen Nachtjob angenommen.", sfx=[("footsteps", 0.3)]),
-    dict(scene="corridor", say="Wachmann im Einkaufszentrum Lindenhof. Nachts. Ganz allein.", flick=0.3),
-    dict(scene="office", say="Im Wachraum lag ein Zettel. Handgeschrieben.", sfx=[("paper", 0.4)]),
-    dict(scene="note:0", say="Mach jetzt einen Screenshot. Du wirst diese Regeln brauchen.", pad=0.6),
-]
-for i in range(7):
-    p1.append(dict(scene=f"note:{i + 1}:{i}", say=RULES[i][1], cap=rule_caption(i), pad=0.4))
-p1 += [
-    dict(scene="note:7", say="Okay. Klingt seltsam. Aber ich brauchte das Geld.", pad=0.5),
-    dict(scene="office", time="01:09", say="Die ersten Stunden waren ruhig. Das Radio rauschte leise vor sich hin.", radio=0.5),
-    dict(scene="door3", time="01:12", say="Dann, um ein Uhr zwölf, hörte ich etwas aus Lager drei.",
-         cap="Dann, um 01:12 Uhr, hörte ich etwas aus Lager 3.", radio=0.25),
-    dict(scene="door3", voice="call", say="Jonas. Jonas. Komm her. Ich brauche Hilfe.", sfx=[("sting", 0.0)], flick=0.6, pad=0.8),
-    dict(scene="door3", choice=("Hingehen", "Radio lauter drehen"),
-         say="Was soll ich tun? A: Hingehen. Oder B: Das Radio lauter drehen."),
-    dict(scene="door3", say=END_HINT, pad=1.2, end=True),
-]
-PARTS.append(dict(n=1, segs=p1))
+# ===================================================================== TEIL 1
+PARTS.append(dict(n=1, name="Die erste Nacht", segs=[
+    dict(shot="hook", who="jonas", say="Diese vier Regeln haben mir in einer einzigen Nacht dreimal das Leben gerettet.",
+         sfx=[("sting", 0.0)], tense=0.8, pad=0.3),
+    dict(shot="exterior", who="jonas", time="21:47", say="Ich bin Jonas, neunzehn. Ich brauchte Geld. Also nahm ich den Job, den keiner wollte.",
+         sfx=[("thunder", 0.4)], title=True, tense=0.2),
+    dict(shot="exterior", who="jonas", say="Nachtwächter im Lindenhof. Einem Einkaufszentrum, das bald abgerissen wird.",
+         opt=dict(push=True), tense=0.25, pad=0.2),
+    dict(shot="walter", who="walter", talk=True, say="Du bist also der Neue.", tense=0.2, pad=0.4),
+    dict(shot="walter", who="walter", talk=True, say="Nein. Sag mir nicht, wie du heißt. Ist besser so, Junge.", tense=0.25),
+    dict(shot="walter", who="jonas", say="Das war Walter. Einunddreißig Jahre Nachtschicht. Seine Hände haben die ganze Zeit gezittert.",
+         cap="Das war Walter. 31 Jahre Nachtschicht. Seine Hände haben die ganze Zeit gezittert.", opt=dict(close=True), tense=0.3),
+    dict(shot="card", who="walter", say="Vier Regeln. Lern sie auswendig. Sie halten dich am Leben.",
+         opt=dict(reveal=0), sfx=[("paper", 0.1)], tense=0.35),
+    dict(shot="card", who="walter", say="Eins. Hier drin kennt niemand deinen Namen. Halte es so.", opt=dict(reveal=1, hl=0), tense=0.35, pad=0.4),
+    dict(shot="card", who="walter", say="Zwei. Das Radio übertönt alles, was nicht hier sein sollte.", opt=dict(reveal=2, hl=1), tense=0.35, pad=0.4),
+    dict(shot="card", who="walter", say="Drei. Was im Licht steht, kann sich nicht bewegen.", opt=dict(reveal=3, hl=2), tense=0.4, pad=0.4),
+    dict(shot="card", who="walter", say="Vier. Ich komme um sechs. Nie früher.", opt=dict(reveal=4, hl=3), tense=0.4, pad=0.6),
+    dict(shot="leave", who="walter", say="Ich bin um sechs zurück. Keine Minute früher.", sfx=[("door", 2.4), ("lock", 4.4)], pad=1.2, tense=0.3),
+    dict(shot="corridor_jonas", who="jonas", time="00:12", say="Dann war ich allein. Vierzigtausend Quadratmeter Dunkelheit.",
+         cap="Dann war ich allein. 40.000 Quadratmeter Dunkelheit.", sfx=[("footsteps", 0.2)], tense=0.35),
+    dict(shot="phone_call", who="jonas", time="00:30", say="Um halb eins rief meine Mutter an. Und ich hab nicht nachgedacht.",
+         sfx=[("buzz", 0.0), ("buzz", 1.6)], tense=0.4),
+    dict(shot="phone_call", who="mama", say="Jonas? Schatz? Hast du was gegessen? Jonas, hörst du mich?", opt=dict(active=True), hall=True, tense=0.4),
+    dict(shot="watcher", who="jonas", say="Ihre Stimme hallte durch das ganze Gebäude. Und ganz hinten im Gang hat sich etwas bewegt.",
+         sfx=[("low_hit", 3.2)], tense=0.65, pad=0.8),
+    dict(shot="jonas_office", who="jonas", time="01:12", say="Eine halbe Stunde später. Wachraum. Das Radio rauschte leise vor sich hin.",
+         radio=0.4, tense=0.4, sfx=[("knock", 4.6)], pad=1.0),
+    dict(shot="door3", who="mama_door", say="Jonas? Schatz, ich bin's. Mach bitte auf. Mir ist so kalt.",
+         sfx=[("knock", 0.0)], radio=0.2, tense=0.75, pad=0.6, opt=dict(feet=True)),
+    dict(shot="door3", who="jonas", say="Das war die Stimme meiner Mutter. Aus Lager drei. Das von außen abgeschlossen ist.",
+         cap="Das war die Stimme meiner Mutter. Aus Lager 3. Das von außen abgeschlossen ist.", opt=dict(feet=True, push=True),
+         radio=0.2, tense=0.85, sfx=[("knock", 3.0)]),
+    dict(shot="door3", who="jonas", choice=("Zu Lager 3 gehen und aufmachen", "Das Radio lauter drehen"),
+         say="Was soll ich tun? A: Hingehen und aufmachen. Oder B: Das Radio lauter drehen.", opt=dict(feet=True), radio=0.2, tense=1.0),
+    dict(shot="door3", who="jonas", say=END_Q, end=True, pad=1.4, radio=0.2, tense=0.5),
+]))
 
-# ---------------------------------------------------------------- TEIL 2
-p2 = [
-    dict(scene="door3", time="01:12", say="Die Stimme aus Lager drei rief meinen Namen.", cap="Die Stimme aus Lager 3 rief meinen Namen.", flick=0.4),
-    dict(scene="note:7:2", say="Die richtige Antwort war B. Regel drei: Niemand hier kennt meinen Namen.", cap="Die richtige Antwort war B. Regel 3: Niemand hier kennt meinen Namen.", pad=0.4),
-    dict(scene="note:7:1", say="Und Regel zwei: Hörst du etwas, das du nicht hören willst, dreh das Radio lauter.", cap="Und Regel 2: Hörst du etwas, das du nicht hören willst – dreh das Radio lauter.", pad=0.4),
-    dict(scene="office", say="Ich drehte das Radio voll auf. Das Rufen wurde leiser. Dann hörte es auf.", radio=1.0),
-    dict(scene="door3", say="Später fiel mir auf: Lager drei war von außen abgeschlossen. Den einzigen Schlüssel hatte ich.",
-         cap="Später fiel mir auf: Lager 3 war von außen abgeschlossen. Den einzigen Schlüssel hatte ich.", radio=0.3, pad=0.6),
-    dict(scene="corridor", time="02:40", say="Um zwei Uhr vierzig machte ich meine Runde. Erstes Obergeschoss.", cap="Um 02:40 Uhr machte ich meine Runde. Erstes Obergeschoss.", sfx=[("footsteps", 0.2)]),
-    dict(scene="mann_n", say="Bei Mode Kessler standen die Puppen wie immer da. Gesicht zur Wand.", flick=0.2),
-    dict(scene="mann_t", say="Dann flackerte meine Taschenlampe. Und eine von ihnen sah mich an.", sfx=[("sting", 1.8)], flick=1.0, pad=0.8),
-    dict(scene="mann_t", choice=("Umdrehen & zum Wachraum rennen", "Anleuchten & langsam rückwärts weggehen"),
-         say="Was soll ich tun? A: Umdrehen und zum Wachraum rennen. Oder B: Sie anleuchten und langsam rückwärts weggehen.", flick=0.4),
-    dict(scene="mann_t", say=END_HINT, pad=1.2, end=True, flick=0.4),
-]
-PARTS.append(dict(n=2, segs=p2))
+# ===================================================================== TEIL 2
+PARTS.append(dict(n=2, name="Das Mädchen auf der Rolltreppe", segs=[
+    dict(shot="door3", who="mama_door", say="Jonas? Mach bitte auf.", opt=dict(feet=True), title=True, sfx=[("knock", 0.2)], tense=0.7, pad=0.6),
+    dict(shot="card", who="jonas", say="Richtig war B. Regel eins: Hier drin kennt niemand meinen Namen. Wer ihn trotzdem ruft, hat ihn nur aufgeschnappt.",
+         cap="Richtig war B. Regel 1: Hier drin kennt niemand meinen Namen. Wer ihn trotzdem ruft, hat ihn nur aufgeschnappt.",
+         opt=dict(reveal=4, hl=0), tense=0.4),
+    dict(shot="card", who="jonas", say="Und Regel zwei: Das Radio übertönt alles, was nicht hier sein sollte.",
+         cap="Und Regel 2: Das Radio übertönt alles, was nicht hier sein sollte.", opt=dict(reveal=4, hl=1), tense=0.4),
+    dict(shot="radio", who="jonas", say="Ich drehte auf, bis die Boxen kratzten. Die Stimme wurde leiser. Und leiser.", radio=1.0, tense=0.6),
+    dict(shot="radio", who="mama_door", say="Warum machst du nicht auf?", radio=1.0, gain=0.45, tense=0.6, pad=0.8),
+    dict(shot="phone_msg", who="jonas", time="01:14", say="Eine Minute später bekam ich eine Nachricht.", sfx=[("buzz", 0.0)], radio=0.3, tense=0.4, pad=0.8),
+    dict(shot="phone_msg", who="jonas", say="Meine Mutter lag die ganze Zeit zu Hause im Bett.", opt=dict(zoom=True), radio=0.3, tense=0.6, sfx=[("low_hit", 0.2)], pad=0.6),
+    dict(shot="corridor_jonas", who="jonas", time="02:40", say="Um zwei Uhr vierzig machte ich meine Runde. Erste Etage. Da hörte ich jemanden summen.",
+         cap="Um 02:40 Uhr machte ich meine Runde. Erste Etage. Da hörte ich jemanden summen.", sfx=[("footsteps", 0.2), ("hum", 4.2)], tense=0.45),
+    dict(shot="escalator", who="jonas", say="Auf der stillstehenden Rolltreppe saß ein kleines Mädchen. Gelber Regenmantel. Nasse Gummistiefel.",
+         sfx=[("hum", 0.0)], tense=0.5),
+    dict(shot="mia", who="mia", talk=True, say="Ich hab mich versteckt, als alle nach Hause gegangen sind. Jetzt find ich meine Mama nicht mehr.", tense=0.5),
+    dict(shot="jonas_close", who="jonas", say="Sie war vielleicht sieben. Ihre Stiefel tropften. Dabei hatte es seit Stunden aufgehört zu regnen.",
+         sfx=[("drip", 0.5), ("drip", 2.1), ("drip", 3.4)], tense=0.6),
+    dict(shot="mia", who="mia", talk=True, say="Ich heiße Mia. Und wie heißt du?", opt=dict(tilt=True), tense=0.8, pad=0.6),
+    dict(shot="mia", who="jonas", choice=("„Ich heiße Jonas.“", "„Ich bin nur der Wachmann.“"),
+         say="Was soll ich antworten? A: Ich heiße Jonas. Oder B: Ich bin nur der Wachmann.", opt=dict(tilt=True), tense=1.0),
+    dict(shot="mia", who="jonas", say=END_Q, end=True, pad=1.4, opt=dict(tilt=True), tense=0.5),
+]))
 
-# ---------------------------------------------------------------- TEIL 3
-p3 = [
-    dict(scene="mann_t", time="02:41", say="Die Puppe bei Mode Kessler hatte mich angesehen.", flick=0.6),
-    dict(scene="note:7:3", say="Die Antwort war B. Regel vier: Dreh ihnen niemals den Rücken zu.", cap="Die Antwort war B. Regel 4: Dreh ihnen NIE den Rücken zu.", pad=0.4),
-    dict(scene="mann_t", say="Ich ließ das Licht auf ihr. Schritt für Schritt rückwärts. Sie bewegte sich nicht. Solange ich hinsah.", flick=0.3, sfx=[("footsteps_slow", 1.6)]),
-    dict(scene="corridor", say="Als ich um die Ecke war, fiel hinter mir etwas um.", sfx=[("thud", 2.3)], pad=0.8),
-    dict(scene="office", time="03:33", say="Zurück im Wachraum. Drei Uhr dreiunddreißig. Das Telefon klingelte.", cap="Zurück im Wachraum. 03:33 Uhr. Das Telefon klingelte.", sfx=[("ring", 2.6)], radio=0.3, pad=1.2),
-    dict(scene="phone", voice="phone", say="Hier Brandt. Im Parkdeck brennt es. Raus aus dem Gebäude, sofort!", shake=True, radio=0.2),
-    dict(scene="phone", say="Die Stimme klang genau wie mein Chef.", radio=0.2),
-    dict(scene="phone", choice=("Sofort raus aus dem Gebäude", "Auflegen & im Wachraum bleiben"),
-         say="Was soll ich tun? A: Sofort raus aus dem Gebäude. Oder B: Auflegen und im Wachraum bleiben.", radio=0.2),
-    dict(scene="phone", say=END_HINT, pad=1.2, end=True, radio=0.2),
-]
-PARTS.append(dict(n=3, segs=p3))
+# ===================================================================== TEIL 3
+PARTS.append(dict(n=3, name="Was im Licht steht", segs=[
+    dict(shot="mia", who="mia", talk=True, say="Und wie heißt du?", opt=dict(tilt=True), title=True, tense=0.7, pad=0.6),
+    dict(shot="card", who="jonas", say="Richtig war B. Regel eins: Hier drin kennt niemand deinen Namen. Halte es so.",
+         cap="Richtig war B. Regel 1: Hier drin kennt niemand deinen Namen. Halte es so.", opt=dict(reveal=4, hl=0), tense=0.4),
+    dict(shot="jonas_close", who="jonas", talk=True, say="Ich bin nur der Wachmann.", tense=0.6, pad=0.6),
+    dict(shot="mia", who="jonas", say="Ihr Lächeln blieb einfach stehen. Wie eingefroren.", opt=dict(tilt=True, freeze=True), tense=0.75, pad=0.3),
+    dict(shot="mia", who="mia_dark", talk=True, say="Schade.", opt=dict(dark=True), sfx=[("sting", 0.0)], tense=0.95, pad=1.0),
+    dict(shot="blackout", who="jonas", say="Dann ging das Licht aus. Im ganzen Gebäude.", sfx=[("power_down", 0.0), ("click", 2.6)], tense=0.6, pad=0.6),
+    dict(shot="escalator_empty", who="jonas", say="Die Rolltreppe war leer. Nur ihr Stoffhase lag noch da.", tense=0.6, pad=0.4),
+    dict(shot="creature", who="jonas", say="Am Ende des Gangs stand etwas. Es trug ihren gelben Regenmantel. Aber es war fast drei Meter groß.",
+         opt=dict(dist=1.0), tense=0.8, sfx=[("low_hit", 1.0)]),
+    dict(shot="creature", who="jonas", say="Meine Taschenlampe flackerte. Und jedes Mal, wenn es dunkel wurde, war es näher.",
+         opt=dict(dist=1.0, approach=True), tense=0.95),
+    dict(shot="creature", who="jonas", choice=("Umdrehen und zum Wachraum rennen", "Licht draufhalten und rückwärts gehen"),
+         say="Was soll ich tun? A: Umdrehen und rennen. Oder B: Das Licht draufhalten und rückwärts gehen.",
+         hint="Es ist nur noch zehn Meter entfernt.", opt=dict(dist=0.45), tense=1.0),
+    dict(shot="creature", who="jonas", say=END_Q, end=True, pad=1.4, opt=dict(dist=0.45), tense=0.5),
+]))
 
-# ---------------------------------------------------------------- TEIL 4
-p4 = [
-    dict(scene="phone", time="03:34", say="Mein Chef rief an. Angeblich brannte es.", radio=0.2),
-    dict(scene="note:7:4", say="Die Antwort war B. Regel fünf: Herr Brandt telefoniert nie.", cap="Die Antwort war B. Regel 5: Herr Brandt telefoniert nie.", pad=0.3),
-    dict(scene="note:7:0", say="Und Regel eins: Verlasse das Gebäude nie vor sechs Uhr. Egal, wer dich darum bittet.", cap="Und Regel 1: Verlasse das Gebäude NIE vor 6:00 Uhr – egal, wer dich darum bittet.", pad=0.4),
-    dict(scene="phone", say="Ich legte auf. Kein Rauch. Kein Alarm. Nur das Rauschen vom Radio.", radio=0.5),
-    dict(scene="phone", say="Das Telefon klingelte noch dreimal. Dann nie wieder.", sfx=[("ring", 2.4)], radio=0.3, shake=True, pad=0.8),
-    dict(scene="entrance", time="05:41", say="Fünf Uhr einundvierzig. Fast geschafft. Da ging die Glastür am Haupteingang auf.", cap="05:41 Uhr. Fast geschafft. Da ging die Glastür am Haupteingang auf.", sfx=[("door", 3.6)], pad=0.6),
-    dict(scene="entrance_man", say="Ein Mann in Uniform. Die Taschenlampe direkt auf mich gerichtet.", flick=0.3),
-    dict(scene="entrance_man", voice="man", say="Morgen, Jonas. Schichtwechsel. Du kannst heute früher gehen.", pad=0.6),
-    dict(scene="entrance_man", choice=("Nach Hause gehen", "Bis 6:00 Uhr bleiben"),
-         say="Was soll ich tun? A: Nach Hause gehen. Oder B: Bis sechs Uhr bleiben. Tipp: Es gibt zwei Hinweise.",
-         hint="Tipp: In den Regeln stecken ZWEI Hinweise."),
-    dict(scene="entrance_man", say=END_HINT, pad=1.2, end=True),
-]
-PARTS.append(dict(n=4, segs=p4))
+# ===================================================================== TEIL 4
+PARTS.append(dict(n=4, name="Klopfen an der Glastür", segs=[
+    dict(shot="creature", who="jonas", say="Es kam näher. Jedes Mal, wenn das Licht ausging.", opt=dict(dist=0.45, approach=True), title=True, tense=0.9),
+    dict(shot="card", who="jonas", say="Richtig war B. Regel drei: Was im Licht steht, kann sich nicht bewegen.",
+         cap="Richtig war B. Regel 3: Was im Licht steht, kann sich nicht bewegen.", opt=dict(reveal=4, hl=2), tense=0.4),
+    dict(shot="creature_close", who="jonas", say="Ich hielt den Strahl genau auf sein Gesicht. Es bewegte sich nicht. Nur seine Finger zuckten.", tense=0.9),
+    dict(shot="creature", who="jonas", say="Ich ging rückwärts. Vierzig Meter. Ohne zu blinzeln. Bis ich die Tür vom Wachraum im Rücken spürte.",
+         cap="Ich ging rückwärts. 40 Meter. Ohne zu blinzeln. Bis ich die Tür vom Wachraum im Rücken spürte.",
+         opt=dict(dist=0.3, recede=True), sfx=[("slam", 6.6)], tense=0.85, pad=0.8),
+    dict(shot="jonas_office", who="jonas", time="03:20", say="Den Rest der Nacht saß ich mit dem Rücken zur Wand. Das Radio auf voller Lautstärke.",
+         opt=dict(scared=True), radio=0.9, tense=0.5),
+    dict(shot="cctv", who="jonas", time="05:41", say="Um fünf Uhr einundvierzig klopfte jemand an die Glastür vom Haupteingang.",
+         cap="Um 05:41 Uhr klopfte jemand an die Glastür vom Haupteingang.", sfx=[("glass_knock", 1.0), ("glass_knock", 3.4)], radio=0.4, tense=0.6),
+    dict(shot="glass_walter", who="walter_door", talk=True, say="Jonas! Mach auf! Ich hab meinen Schlüssel vergessen!", sfx=[("glass_knock", 0.0)], tense=0.75),
+    dict(shot="glass_walter", who="jonas", say="Es war Walter. Klatschnass. Er sah panisch aus.", opt=dict(panic=True), tense=0.75),
+    dict(shot="glass_walter", who="walter_door", talk=True, say="Bitte, Jonas! Hier draußen ist irgendwas! Es kommt näher!", sfx=[("glass_knock", 0.0), ("glass_knock", 2.2)],
+         opt=dict(shake=True), tense=0.9),
+    dict(shot="glass_walter", who="jonas", choice=("Die Tür aufmachen", "Nicht aufmachen"),
+         say="Was soll ich tun? A: Die Tür aufmachen. Oder B: Nicht aufmachen. Kleiner Tipp: Es gibt zwei Hinweise.",
+         hint="Tipp: Es gibt ZWEI Hinweise.", tense=1.0),
+    dict(shot="glass_walter", who="jonas", say=END_Q, end=True, pad=1.4, tense=0.5),
+]))
 
-# ---------------------------------------------------------------- TEIL 5 (Finale)
-p5 = [
-    dict(scene="entrance_man", time="05:42", say="Der Mann am Eingang wollte, dass ich früher gehe."),
-    dict(scene="note:7:0", say="Die Antwort war B. Regel eins: Nie vor sechs Uhr gehen.", cap="Die Antwort war B. Regel 1: NIE vor 6:00 Uhr gehen.", pad=0.3),
-    dict(scene="note:7:2", say="Und er nannte mich Jonas. Aber hier kennt niemand meinen Namen.", pad=0.4),
-    dict(scene="entrance_man", say="Ich blieb stehen. Er lächelte. Viel zu lange.", flick=0.5, pad=0.4),
-    dict(scene="entrance", say="Dann ging die Tür wieder zu. Und er war weg.", sfx=[("door", 0.4)], pad=0.6),
-    dict(scene="entrance", time="06:00", say="Um Punkt sechs kam die Frühschicht. Ein alter Mann. Er nickte nur: Morgen, Neuer.",
-         cap="Um Punkt 6:00 Uhr kam die Frühschicht. Ein alter Mann. Er nickte nur: „Morgen, Neuer.“"),
-    dict(scene="office", say="Bevor ich ging, sah ich mir den Zettel noch einmal an.", sfx=[("paper", 0.5)]),
-    dict(scene="note_final", say="Ganz unten stand eine neue Regel. Regel acht.", cap="Ganz unten stand eine neue Regel. Regel 8.", sfx=[("sting", 2.0)], pad=0.6),
-    dict(scene="note_final", say="Geh niemals in Lager vier. Du hast es versprochen.", cap="„Geh niemals in Lager 4. Du hast es versprochen.“", pad=0.6),
-    dict(scene="door4", say="Das Problem: Es war meine Handschrift. Und ich erinnere mich nicht, das geschrieben zu haben.", flick=0.5, pad=1.0),
-    dict(scene="door4", say="Wie viele Antworten hattest du richtig? Schreib es in die Kommentare.", pad=1.5, end=True, final=True, flick=0.3),
-]
-PARTS.append(dict(n=5, segs=p5))
+# ===================================================================== TEIL 5
+PARTS.append(dict(n=5, name="Sechs Uhr", segs=[
+    dict(shot="glass_walter", who="walter_door", talk=True, say="Jonas! Mach auf!", title=True, sfx=[("glass_knock", 0.0)], tense=0.8, pad=0.6),
+    dict(shot="card", who="jonas", say="Richtig war B. Regel vier: Ich komme um sechs. Nie früher.",
+         cap="Richtig war B. Regel 4: Ich komme um 6 Uhr. Nie früher.", opt=dict(reveal=4, hl=3), tense=0.4),
+    dict(shot="card", who="jonas", say="Und Walter kannte meinen Namen gar nicht. Er wollte ihn nie wissen.", opt=dict(reveal=4, hl=0), tense=0.5),
+    dict(shot="glass_walter", who="jonas", say="Ich blieb einfach stehen. Walter hörte auf zu klopfen. Und lächelte. Immer breiter.",
+         opt=dict(grin=True), tense=0.85),
+    dict(shot="glass_walter", who="creature", talk=True, say="Morgen Nacht, Jonas.", opt=dict(grin=True, black=True, close=True),
+         sfx=[("sting", 0.0)], tense=1.0, pad=1.0),
+    dict(shot="entrance", who="jonas", say="Dann trat er zurück in den Regen. Und war verschwunden.", tense=0.5, pad=0.6),
+    dict(shot="dawn", who="jonas", time="06:00", say="Um Punkt sechs ging die Sonne auf. Und Walter kam. Der echte. Trocken. Mit zwei Kaffee.",
+         sfx=[("keys", 1.0), ("door", 2.5)], tense=0.15),
+    dict(shot="walter_dawn", who="walter", talk=True, say="Na, Junge? Du lebst ja noch. Respekt.", tense=0.1),
+    dict(shot="jonas_close", who="jonas", talk=True, say="Du warst vorhin schon mal hier. Um fünf Uhr einundvierzig.", opt=dict(dawn=True), tense=0.3),
+    dict(shot="walter_dawn", who="walter", talk=True, say="Hast du aufgemacht?", opt=dict(serious=True), tense=0.5, pad=0.5),
+    dict(shot="jonas_close", who="jonas", talk=True, say="Nein.", opt=dict(dawn=True), tense=0.5, pad=0.6),
+    dict(shot="walter_dawn", who="walter", talk=True, say="Gut. Der Letzte hat aufgemacht.", opt=dict(serious=True), tense=0.6, pad=0.8),
+    dict(shot="walter_dawn", who="walter", talk=True, say="Geh nach Hause und schlaf dich aus. Wir sehen uns heute Abend. Jonas.", tense=0.6, pad=0.4),
+    dict(shot="walter_end", who="jonas", say="Er ging den Gang hinunter. Und mir wurde eiskalt. Denn ich hatte Walter nie gesagt, wie ich heiße.",
+         sfx=[("sting", 5.2)], tense=0.9, pad=0.6),
+    dict(shot="walter_end", who="jonas", say="Wie viele Antworten hattest du richtig? Schreib es in die Kommentare.", opt=dict(turn=True),
+         end=True, final=True, pad=1.6, tense=0.4),
+]))
