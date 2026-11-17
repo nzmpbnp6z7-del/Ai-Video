@@ -209,12 +209,12 @@ def build_exterior(atlas, dawn=False):
 
 
 def build_corridor(atlas, lit=False):
-    s = Set("corridor" + ("_lit" if lit else ""), atlas, (24, 12, 104))
+    s = Set("corridor" + ("_lit" if lit else ""), atlas, (24, 12, 104), offset=(0, 1, 0))
     w = s.w
     L = 100
     for z in range(L):
         for x in range(1, 22):
-            w.set(x, 0, z, "floor" if (x // 2 + z // 2) % 2 == 0 else "floor_dark")
+            w.set(x, -1, z, "floor" if (x // 2 + z // 2) % 2 == 0 else "floor_dark")
     w.fill(0, 0, 0, 0, 10, L - 1, "plaster")
     w.fill(22, 0, 0, 22, 10, L - 1, "plaster")
     w.fill(0, 10, 0, 22, 10, L - 1, "ceiling")
@@ -223,14 +223,14 @@ def build_corridor(atlas, lit=False):
     neons = ["neon_red", "neon_blue", "neon_pink", "neon_green"]
     for i, z0 in enumerate(range(4, L - 10, 13)):
         for side, x in ((0, 1), (1, 21)):
-            w.fill(x, 1, z0, x, 5, z0 + 9, "shutter")
-            w.fill(x, 6, z0, x, 6, z0 + 9, "metal_dark")
+            w.fill(x, 0, z0, x, 4, z0 + 9, "shutter")
+            w.fill(x, 5, z0, x, 5, z0 + 9, "metal_dark")
             if (i + side) % 3 != 2:
                 nb = neons[(i * 2 + side) % 4]
-                w.fill(x, 7, z0 + 2, x, 7, z0 + 7, nb)
-                s.light(((2.5 if side == 0 else 20.5), 7.5, z0 + 5), _col(nb, 0.5), 7)
-            w.fill(x, 1, z0 + 10, x, 9, z0 + 12, "concrete")
-            w.fill(x + (1 if side == 0 else -1), 1, z0 + 10, x + (1 if side == 0 else -1), 9, z0 + 11, "concrete")
+                w.fill(x, 6, z0 + 2, x, 6, z0 + 7, nb)
+                s.light(((2.5 if side == 0 else 20.5), 6.5, z0 + 5), _col(nb, 0.5), 7)
+            w.fill(x, 0, z0 + 10, x, 9, z0 + 12, "concrete")
+            w.fill(x + (1 if side == 0 else -1), 0, z0 + 10, x + (1 if side == 0 else -1), 9, z0 + 11, "concrete")
     # Deckenlampen
     for i, z in enumerate(range(6, L, 10)):
         on = lit or i % 3 != 1
@@ -242,14 +242,14 @@ def build_corridor(atlas, lit=False):
         w.box(9, 0.45, z, 13, 0.75, z + 1.2, "planks")
         w.box(9.2, 0, z + 0.1, 9.6, 0.45, z + 1.1, "metal_dark")
         w.box(12.4, 0, z + 0.1, 12.8, 0.45, z + 1.1, "metal_dark")
-        w.fill(4, 1, z + 6, 4, 1, z + 6, "bricks")
-        w.fill(4, 2, z + 6, 4, 3, z + 6, "tree_leaves")
-        w.fill(18, 1, z + 6, 18, 1, z + 6, "bricks")
-        w.fill(18, 2, z + 6, 18, 3, z + 6, "tree_leaves")
+        w.fill(4, 0, z + 6, 4, 0, z + 6, "bricks")
+        w.fill(4, 1, z + 6, 4, 2, z + 6, "tree_leaves")
+        w.fill(18, 0, z + 6, 18, 0, z + 6, "bricks")
+        w.fill(18, 1, z + 6, 18, 2, z + 6, "tree_leaves")
     # Notausgang hinten
-    w.fill(10, 8, 1, 12, 8, 1, "exit")
+    w.fill(10, 7, 1, 12, 7, 1, "exit")
     s.light((11, 7, 3), (0.1, 0.8, 0.35), 8)
-    w.fill(9, 1, 1, 13, 5, 1, "door")
+    w.fill(9, 0, 1, 13, 4, 1, "door")
     s.env = dict(amb_sky=(0.20, 0.21, 0.28) if not lit else (0.5, 0.5, 0.52), amb_ground=(0.09, 0.09, 0.12) if not lit else (0.25, 0.25, 0.26),
                  fog=(0.02, 0.025, 0.04), fog_dens=0.028 if not lit else 0.01)
     return s
@@ -271,9 +271,9 @@ def cctv_img(label, seed=0, h=60):
 
 
 def build_office(atlas):
-    s = Set("office", atlas, (14, 9, 14))
+    s = Set("office", atlas, (14, 10, 14), offset=(0, 1, 0))
     w = s.w
-    w.fill(0, 0, 0, 13, 0, 13, "carpet")
+    w.fill(0, -1, 0, 13, -1, 13, "carpet")
     w.fill(0, 0, 0, 0, 8, 13, "plaster_green")
     w.fill(13, 0, 0, 13, 8, 13, "plaster_green")
     w.fill(0, 0, 0, 13, 8, 0, "plaster_green")
@@ -321,29 +321,29 @@ def build_office(atlas):
     w.box(5.7, 1.05, 2.1, 7.3, 2.8, 2.3, "black")
     w.box(6.4, 0, 2.8, 6.6, 0.9, 3.1, "metal")
     # Regal + Tür
-    w.fill(12, 1, 3, 12, 4, 6, "planks")
-    for y in (2, 3):
+    w.fill(12, 0, 3, 12, 3, 6, "planks")
+    for y in (1, 2):
         for z in range(3, 7):
             w.box(11.6, y + 0.05, z + 0.1, 11.95, y + 0.75, z + 0.8, "cardboard" if (y + z) % 2 else "navy")
-    w.fill(0, 1, 9, 0, 3, 10, "door")
+    w.fill(0, 0, 9, 0, 2, 10, "door")
     s.env = dict(amb_sky=(0.38, 0.36, 0.33), amb_ground=(0.18, 0.17, 0.16), fog=(0.03, 0.03, 0.035), fog_dens=0.01)
     s.anchors.update(walter_seat=(6.5, 0.0, 3.0), desk_top=1.25)
     return s
 
 
 def build_service(atlas):
-    s = Set("service", atlas, (12, 9, 32))
+    s = Set("service", atlas, (12, 10, 32), offset=(0, 1, 0))
     w = s.w
-    w.fill(0, 0, 0, 11, 0, 31, "concrete_dark")
+    w.fill(0, -1, 0, 11, -1, 31, "concrete_dark")
     w.fill(0, 0, 0, 0, 8, 31, "concrete")
     w.fill(11, 0, 0, 11, 8, 31, "concrete")
     w.fill(0, 8, 0, 11, 8, 31, "concrete_dark")
     w.fill(0, 0, 1, 11, 8, 1, "concrete")
     # Tür Lager 3
-    w.fill(4, 1, 1, 6, 4, 1, "door")
+    w.fill(4, 0, 1, 6, 3, 1, "door")
     w.box(4.0, 0.0, 1.0, 7.0, 0.1, 1.1, "black")
     sign = pixel_text("STORAGE 3", (20, 20, 20, 255), (226, 222, 210, 255), h=11, up=10)
-    s.wall_decal("sign", sign, 3.6, 5.3, 7.4, 6.2, 2.02, emit=0.1)
+    s.wall_decal("sign", sign, 3.6, 4.3, 7.4, 5.2, 2.02, emit=0.1)
     # Riegel + Vorhängeschloss (außen!)
     w.box(5.2, 2.6, 2.0, 7.4, 2.8, 2.15, "metal")
     w.box(6.9, 2.2, 2.05, 7.3, 2.6, 2.25, "yellow")
@@ -360,7 +360,7 @@ def build_service(atlas):
     w.box(2, 7.3, 0, 2.3, 7.6, 31, "metal_dark")
     w.box(9.3, 7.2, 0, 9.8, 7.7, 31, "red_dark")
     for (x, z, h) in ((1, 6, 2), (2, 6, 1), (9, 9, 3), (1, 12, 1)):
-        w.fill(x, 1, z, x, h, z, "cardboard")
+        w.fill(x, 0, z, x, h - 1, z, "cardboard")
     s.light((5.5, 6, 18), (0.25, 0.28, 0.35), 10)
     s.env = dict(amb_sky=(0.22, 0.21, 0.2), amb_ground=(0.1, 0.1, 0.1), fog=(0.015, 0.015, 0.02), fog_dens=0.03)
     s.anchors.update(door=(5.5, 0, 2.0))
@@ -368,32 +368,31 @@ def build_service(atlas):
 
 
 def build_atrium(atlas):
-    s = Set("atrium", atlas, (30, 20, 44))
+    s = Set("atrium", atlas, (30, 20, 44), offset=(0, 1, 0))
     w = s.w
     for z in range(44):
         for x in range(30):
-            w.set(x, 0, z, "floor" if (x + z) % 2 else "floor_dark")
+            w.set(x, -1, z, "floor" if (x + z) % 2 else "floor_dark")
     w.fill(0, 0, 0, 0, 18, 43, "plaster")
     w.fill(29, 0, 0, 29, 18, 43, "plaster")
     w.fill(0, 0, 0, 29, 18, 0, "plaster")
     w.fill(0, 18, 0, 29, 18, 43, "ceiling")
     w.fill(10, 18, 8, 19, 18, 20, "glass")
     # Galerie oben
-    w.fill(1, 8, 1, 28, 8, 12, "floor")
+    w.fill(1, 7, 1, 28, 7, 12, "floor")
     for x in range(2, 28, 7):
-        w.fill(x, 9, 1, x + 5, 13, 1, "shutter")
-        w.fill(x, 14, 1, x + 5, 14, 1, "metal_dark")
-    w.fill(1, 9, 12, 28, 9, 12, "glass")
-    w.fill(1, 10, 12, 28, 10, 12, None)
-    w.box(1, 10.0, 11.8, 28, 10.15, 12.2, "metal")
+        w.fill(x, 8, 1, x + 5, 12, 1, "shutter")
+        w.fill(x, 13, 1, x + 5, 13, 1, "metal_dark")
+    w.fill(1, 8, 12, 28, 8, 12, "glass_clear")
+    w.box(1, 9.0, 11.8, 28, 9.15, 12.2, "metal")
     for x in (3, 10, 20, 26):
-        w.fill(x, 1, 12, x, 7, 12, "concrete")
+        w.fill(x, 0, 12, x, 6, 12, "concrete")
     # Läden unten
     for z in range(16, 42, 9):
-        w.fill(1, 1, z, 1, 5, z + 6, "shutter")
-        w.fill(28, 1, z, 28, 5, z + 6, "shutter")
-        w.fill(1, 6, z, 1, 6, z + 6, "metal_dark")
-        w.fill(28, 6, z, 28, 6, z + 6, "metal_dark")
+        w.fill(1, 0, z, 1, 4, z + 6, "shutter")
+        w.fill(28, 0, z, 28, 4, z + 6, "shutter")
+        w.fill(1, 5, z, 1, 5, z + 6, "metal_dark")
+        w.fill(28, 5, z, 28, 5, z + 6, "metal_dark")
     # Rolltreppe (von z=30 unten nach z=13 oben, x 12..14.5)
     steps = 16
     x0, x1 = 12.0, 14.6
@@ -419,8 +418,8 @@ def build_atrium(atlas):
     s.light((25, 13, 4), (0.15, 0.7, 0.35), 8)
     w.fill(24, 15, 1, 26, 15, 1, "exit")
     for z in (20, 34):
-        w.fill(4, 1, z, 4, 1, z, "bricks"); w.fill(4, 2, z, 4, 3, z, "tree_leaves")
-        w.fill(25, 1, z, 25, 1, z, "bricks"); w.fill(25, 2, z, 25, 3, z, "tree_leaves")
+        w.fill(4, 0, z, 4, 0, z, "bricks"); w.fill(4, 1, z, 4, 2, z, "tree_leaves")
+        w.fill(25, 0, z, 25, 0, z, "bricks"); w.fill(25, 1, z, 25, 2, z, "tree_leaves")
     s.env = dict(amb_sky=(0.26, 0.28, 0.36), amb_ground=(0.11, 0.11, 0.14), fog=(0.03, 0.035, 0.05), fog_dens=0.018)
     return s
 
