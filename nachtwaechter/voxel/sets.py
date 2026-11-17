@@ -311,7 +311,7 @@ def build_office(atlas):
     w.box(8.5, 1.6, 5.0, 10.1, 1.85, 5.35, "red_dark")
     s.anchors["phone"] = (9.3, 1.6, 5.4)
     # Thermoskanne, Papiere, Lampe
-    w.box(6.9, 1.25, 5.0, 7.3, 2.1, 5.4, "plaster_green")
+    w.box(1.55, 1.25, 4.8, 1.95, 2.1, 5.2, "plaster_green")
     w.box(5.0, 1.26, 5.2, 6.4, 1.28, 6.1, "white")
     w.box(10.4, 1.25, 4.8, 10.8, 2.6, 5.2, "metal_dark")
     w.box(10.0, 2.5, 4.8, 11.0, 2.8, 5.6, "metal_dark")

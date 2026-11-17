@@ -382,7 +382,7 @@ def sh_walter(c):
     else:
         a, u, _ = angle(c, [((6.5, 2.9, 9.0), hp, (6.5, 2.8, 8.2), hp, 42),
                              ((hp[0] + 0.7, hp[1] + 0.1, hp[2] + 2.9), (hp[0], hp[1] - 0.15, hp[2]), (hp[0] + 0.5, hp[1] + 0.05, hp[2] + 2.6), (hp[0], hp[1] - 0.15, hp[2]), 40),
-                             ((10.0, 2.7, 7.6), hp, (9.6, 2.6, 7.2), hp, 42)], cut=2.6)
+                             ((9.4, 3.2, 8.4), hp, (9.0, 3.1, 8.0), hp, 42)], cut=2.6)
         eye, tgt, fov = cam_from(a, u)
     return S(set="office", eye=handheld(eye, c, 0.015), target=tgt, fov=fov, chars=[("walter", pose, e, mouth_state(c, "walter"))],
              post=dict(grade=(1.05, 0.98, 0.9)))
